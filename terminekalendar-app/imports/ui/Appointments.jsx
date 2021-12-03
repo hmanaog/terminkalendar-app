@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -6,32 +6,28 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 const localizer = momentLocalizer(moment);
 
 export const Appointments = ({ appointments, setState, setShowUpdateButton }) => {
-   const events = [];
+   const [eventState, setEventState] = useState([]);
 
-   const insertToState = (appointments) => {
-      if (appointments !== undefined) {
-         appointments.forEach((data) => {
-            let body = {
-               id: data._id,
-               firstname: data.firstname,
-               lastname: data.lastname,
-               date: data.date,
-               phoneNumber: data.phoneNumber,
-               phoneType: data.phoneType,
-               start: moment(data.date).toDate(),
-               end: moment(data.date).toDate(),
-               title: `${data.firstname} ${data.lastname} - ${data.phoneNumber}`,
-            };
-            events.push(body);
-         });
-      }
-   };
+   useEffect(() => {
+      const events = [];
+      appointments.forEach((data) => {
+         let body = {
+            id: data._id,
+            firstname: data.firstname,
+            lastname: data.lastname,
+            date: data.date,
+            phoneNumber: data.phoneNumber,
+            phoneType: data.phoneType,
+            start: moment(data.date).toDate(),
+            end: moment(data.date).toDate(),
+            title: `${data.firstname} ${data.lastname} - ${data.phoneNumber}`,
+         };
+         events.push(body);
+      });
+      setEventState(events);
+   }, [appointments]);
 
-   useMemo(() => {
-      insertToState(appointments);
-   }, [events, appointments]);
-
-   const openModal = (data) => {
+   const showEventDetails = (data) => {
       setShowUpdateButton(true);
       setState({
          id: data.id,
@@ -48,10 +44,10 @@ export const Appointments = ({ appointments, setState, setShowUpdateButton }) =>
             localizer={localizer}
             defaultDate={new Date()}
             defaultView='month'
-            events={events}
+            events={eventState}
             style={{ height: '100vh' }}
             views={{ month: true, agenda: true }}
-            onSelectEvent={(data) => openModal(data)}
+            onSelectEvent={(data) => showEventDetails(data)}
          />
       </React.Fragment>
    );
